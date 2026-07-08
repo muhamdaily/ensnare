@@ -1,0 +1,31 @@
+# Build stage
+FROM oven/bun:alpine AS builder
+
+WORKDIR /app
+
+COPY package.json bun.lock ./
+RUN --mount=type=cache,target=/root/.bun/install/cache bun upgrade --canary && bun install --frozen-lockfile
+# RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile 
+
+COPY src ./src
+RUN --mount=type=cache,target=/root/.bun/install/cache bun --bun run build:stats:standalone
+# RUN bun run build:stats:standalone
+
+# Production stage
+FROM alpine:latest AS production
+
+WORKDIR /app
+
+RUN apk add --no-cache libstdc++ libgcc
+
+# RUN addgroup -g 10001 botgroup && adduser -D -u 10001 -G botgroup -s /sbin/nologin botuser
+
+# COPY --from=builder --chown=botuser:botgroup /app/dist/stats-api ./stats-api
+COPY --from=builder /app/dist/stats-api ./stats-api
+
+# USER botuser
+
+EXPOSE 3000
+ENV NODE_ENV=production
+
+CMD ["./stats-api", "--title=Ensnare-Stats"]
