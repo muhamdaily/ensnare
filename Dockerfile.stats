@@ -3,6 +3,9 @@ FROM oven/bun:alpine AS builder
 
 WORKDIR /app
 
+ARG GIT_SHA
+LABEL org.opencontainers.image.revision=$GIT_SHA
+
 COPY package.json bun.lock ./
 RUN --mount=type=cache,target=/root/.bun/install/cache bun upgrade --canary && bun install --frozen-lockfile
 # RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile 

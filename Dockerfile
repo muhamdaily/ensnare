@@ -3,6 +3,9 @@ FROM oven/bun:alpine AS builder
 
 WORKDIR /app
 
+ARG GIT_SHA
+LABEL org.opencontainers.image.revision=$GIT_SHA
+
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 # railway is dumb so lets not bother with being fancy here
